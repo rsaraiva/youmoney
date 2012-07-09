@@ -5,12 +5,14 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
 public class Lancamento implements Serializable {
 
 	@Id
+	@GeneratedValue
 	private Integer id;
 
 	private String descricao;
@@ -18,6 +20,10 @@ public class Lancamento implements Serializable {
 	private Calendar data;
 
 	private BigDecimal valor;
+
+	public Lancamento() {
+		data = Calendar.getInstance();
+	}
 
 	public Integer getId() {
 		return id;

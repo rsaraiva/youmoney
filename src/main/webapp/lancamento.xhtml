@@ -1,19 +1,38 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:p="http://primefaces.org/ui">
-<h:head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>YouMoney</title>
-</h:head>
-<h:body>
-	
-	<h:form>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="_template.xhtml">
+
+	<ui:define name="body">
+
+		<h1>Lançamentos</h1>
+
+		<h:form>
 		
-	</h:form>
-	
-</h:body>
+			<p:messages id="messages" />
+
+			<p:outputLabel for="data" value="Data" />
+			<br />
+			<p:calendar id="data" value="#{lancamentoBean.lancamento.data.time}" pattern="dd/MM/yyyy" />
+			<br />
+
+			<p:outputLabel for="valor" value="Valor" />
+			<br />
+			<p:inputText id="valor" value="#{lancamentoBean.lancamento.valor}" />
+			<br />
+
+			<p:outputLabel for="descricao" value="Descrição" />
+			<br />
+			<p:inputText id="descricao" value="#{lancamentoBean.lancamento.descricao}" size="50" />
+			<br />
+
+			<br />
+			<p:commandButton value="Salva" action="#{lancamentoBean.grava}" update="@form" ajax="false" />
+			<p:commandButton value="Cancela" action="lancamento.xhtml?faces-redirect=true" />
+		</h:form>
+
+	</ui:define>
+</ui:composition>
 </html>
