@@ -10,6 +10,25 @@
 	<title>YouMoney</title>
 </h:head>
 <h:body>
-	<ui:insert name="body"></ui:insert>	
+	
+	<h:form id="formMenu">
+		<p:menubar>
+			<p:submenu label="Cadastros">
+				<p:menuitem value="Lançamentos" action="lancamento.xhtml?faces-redirect=true" update=":groupBody"/>
+				<p:menuitem value="Cartões de Crédito" action="cartaoDeCredito.xhtml?faces-redirect=true" update=":groupBody"/>
+			</p:submenu>
+		</p:menubar>
+	</h:form>
+	
+	<h:panelGroup id="groupBody">
+		<ui:insert name="body"></ui:insert>
+	</h:panelGroup>
+
+	<!-- ajax status -->
+	<p:ajaxStatus onstart="statusDialog.show();" onsuccess="statusDialog.hide();"/>
+	<p:dialog widgetVar="statusDialog" draggable="false" closable="false">
+		Carregando...<br/>
+		<h:graphicImage name="ajaxloadingbar.gif" library="images"/>
+	</p:dialog>
 </h:body>
 </html>

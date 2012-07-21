@@ -8,14 +8,14 @@
 	<ui:define name="body">
 
 		<h1>Lançamentos</h1>
+		
+		<p:messages id="messages" />
 
 		<h:form>
-		
-			<p:messages id="messages" />
 
 			<p:outputLabel for="data" value="Data" />
 			<br />
-			<p:calendar id="data" value="#{lancamentoBean.lancamento.data.time}" pattern="dd/MM/yyyy" />
+			<p:calendar id="data" value="#{lancamentoBean.lancamento.data}" pattern="dd/MM/yyyy" />
 			<br />
 
 			<p:outputLabel for="valor" value="Valor" />
@@ -27,10 +27,74 @@
 			<br />
 			<p:inputText id="descricao" value="#{lancamentoBean.lancamento.descricao}" size="50" />
 			<br />
+			
+			<h:panelGroup id="groupMeioPagto">
+				<h:panelGrid columns="4">
+					<h:column>
+						<p:outputLabel for="meio" value="Meio de Pagamento" />
+						<br />
+						<p:selectOneMenu id="meio" value="#{lancamentoBean.lancamento.formaDePagamento.meioDePagamento}">
+							<f:selectItems value="#{lancamentoBean.meioPagamentoItems}"/>
+							<p:ajax event="change" process="@this" update="groupMeioPagto"/>
+						</p:selectOneMenu>
+						<br />
+					</h:column>
+					
+					<h:column>
+						<p:outputLabel for="cartao" value="Cartão de Crédito" 
+							rendered="#{lancamentoBean.lancamento.formaDePagamento.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
+						<br />
+						<p:selectOneMenu id="cartao" value="#{lancamentoBean.lancamento.formaDePagamento.cartaoDeCredito.id}" 
+							rendered="#{lancamentoBean.lancamento.formaDePagamento.meioDePagamento.descricao == 'Cartão de Crédito'}"
+							converter="cartaoDeCreditoConverter">
+							<f:selectItems value="#{lancamentoBean.cartaoCreditoItems}"/>
+						</p:selectOneMenu>
+						<br />
+					</h:column>
+					
+					<h:column>
+						<p:outputLabel for="qtdeParcelas" value="Qtde Parcelas" 
+							rendered="#{lancamentoBean.lancamento.formaDePagamento.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
+						<br />
+						<p:inputText id="qtdeParcelas" value="#{lancamentoBean.lancamento.formaDePagamento.quantidadeParcelas}" 
+							rendered="#{lancamentoBean.lancamento.formaDePagamento.meioDePagamento.descricao == 'Cartão de Crédito'}" 
+							size="8"/>
+					</h:column>
+				</h:panelGrid>
+			</h:panelGroup>
 
 			<br />
-			<p:commandButton value="Salva" action="#{lancamentoBean.grava}" update="@form" ajax="false" />
+			<p:commandButton value="Salva" action="#{lancamentoBean.grava}" update="@form :messages table" ajax="false" />
 			<p:commandButton value="Cancela" action="lancamento.xhtml?faces-redirect=true" />
+			
+			<br />
+			<br />
+			
+			<p:dataTable id="table" value="#{lancamentoBean.lista}" var="lancamento">
+				<p:column>
+					<h:outputText value="#{lancamento.data}">
+						<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>
+				</p:column>
+				<p:column>
+					<h:outputText value="#{lancamento.valor}">
+						<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+					</h:outputText>
+				</p:column>
+				<p:column>
+					<h:outputText value="#{lancamento.descricao}" />
+				</p:column>
+				<p:column>
+					<p:commandLink value="Altera" update="@form :messages">
+						<f:setPropertyActionListener target="#{lancamentoBean.lancamento}" value="#{lancamento}" />
+					</p:commandLink>
+				</p:column>
+				<p:column>
+					<p:commandLink value="Excluir" action="#{lancamentoBean.exclui}" update="@form :messages">
+						<f:setPropertyActionListener target="#{lancamentoBean.lancamento}" value="#{lancamento}" />
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
 		</h:form>
 
 	</ui:define>

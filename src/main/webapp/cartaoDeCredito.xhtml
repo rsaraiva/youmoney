@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="_template.xhtml">
+
+	<ui:define name="body">
+
+		<h1>Cartões de Crédito</h1>
+		
+		<p:messages id="messages" />
+
+		<h:form>
+		
+			<p:outputLabel for="descricao" value="Descrição" />
+			<br />
+			<p:inputText id="descricao" value="#{cartaoDeCreditoBean.cartao.descricao}" size="50" />
+			<br />
+
+			<p:outputLabel for="data" value="Data de Vencimento" />
+			<br />
+			<p:inputText id="data" value="#{cartaoDeCreditoBean.cartao.diaVencimento}"/>
+			<br />
+
+			<p:outputLabel for="valor" value="Valor do Limite" />
+			<br />
+			<p:inputText id="valor" value="#{cartaoDeCreditoBean.cartao.limite}" />
+			<br />
+
+			<br />
+			<p:commandButton value="Salva" action="#{cartaoDeCreditoBean.grava}" update="@form :messages table" ajax="false" />
+			<p:commandButton value="Cancela" action="cartaoDeCredito.xhtml?faces-redirect=true" />
+			
+			<br />
+			<br />
+			
+			<p:dataTable id="table" value="#{cartaoDeCreditoBean.lista}" var="cartao">
+				<p:column>
+					<h:outputText value="#{cartao.descricao}" />
+				</p:column>
+				<p:column>
+					<h:outputText value="#{cartao.diaVencimento}"/>
+				</p:column>
+				<p:column>
+					<h:outputText value="#{cartao.limite}">
+						<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+					</h:outputText>
+				</p:column>
+				<p:column>
+					<p:commandLink value="Excluir" action="#{cartaoDeCreditoBean.exclui}" update="@form :messages">
+						<f:setPropertyActionListener target="#{cartaoDeCreditoBean.cartao}" value="#{cartao}" />
+					</p:commandLink>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

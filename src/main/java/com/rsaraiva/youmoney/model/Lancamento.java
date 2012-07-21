@@ -2,13 +2,23 @@ package com.rsaraiva.youmoney.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Calendar;
+import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
+@NamedQueries({
+	@NamedQuery(name = "findAllLancamentos", query = "from Lancamento l")
+})
 public class Lancamento implements Serializable {
 
 	@Id
@@ -17,12 +27,16 @@ public class Lancamento implements Serializable {
 
 	private String descricao;
 
-	private Calendar data;
+	@Temporal(TemporalType.DATE)
+	private Date data;
 
 	private BigDecimal valor;
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	private FormaDePagamento formaDePagamento;
 
 	public Lancamento() {
-		data = Calendar.getInstance();
+		formaDePagamento = new FormaDePagamento(this);
 	}
 
 	public Integer getId() {
@@ -41,11 +55,11 @@ public class Lancamento implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public Calendar getData() {
+	public Date getData() {
 		return data;
 	}
 
-	public void setData(Calendar data) {
+	public void setData(Date data) {
 		this.data = data;
 	}
 
@@ -55,6 +69,14 @@ public class Lancamento implements Serializable {
 
 	public void setValor(BigDecimal valor) {
 		this.valor = valor;
+	}
+
+	public FormaDePagamento getFormaDePagamento() {
+		return formaDePagamento;
+	}
+
+	public void setFormaDePagamento(FormaDePagamento formaDePagamento) {
+		this.formaDePagamento = formaDePagamento;
 	}
 
 	private static final long serialVersionUID = 3819139223671669086L;
