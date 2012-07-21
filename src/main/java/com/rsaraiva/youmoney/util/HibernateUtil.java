@@ -7,8 +7,7 @@ import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
 import com.rsaraiva.youmoney.model.CartaoDeCredito;
-import com.rsaraiva.youmoney.model.FormaDePagamento;
-import com.rsaraiva.youmoney.model.Lancamento;
+import com.rsaraiva.youmoney.model.Despesa;
 import com.rsaraiva.youmoney.model.MeioDePagamento;
 
 public class HibernateUtil {
@@ -17,10 +16,9 @@ public class HibernateUtil {
 
 	static {
 		Configuration configuration = new Configuration();
-		configuration.addAnnotatedClass(Lancamento.class);
+		configuration.addAnnotatedClass(Despesa.class);
 		configuration.addAnnotatedClass(CartaoDeCredito.class);
 		configuration.addAnnotatedClass(MeioDePagamento.class);
-		configuration.addAnnotatedClass(FormaDePagamento.class);
 		configuration.configure();
 		
 		ServiceRegistryBuilder serviceRegistryBuilder = new ServiceRegistryBuilder()

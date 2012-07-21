@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="_template.xhtml">
+
+	<ui:define name="body">
+
+		<h1>Lançamentos</h1>
+		
+		<p:messages id="messages" />
+
+		<h:form>
+
+			<p:outputLabel for="data" value="Data" />
+			<br />
+			<p:calendar id="data" value="#{despesaBean.lancamento.data}" pattern="dd/MM/yyyy" />
+			<br />
+
+			<p:outputLabel for="valor" value="Valor" />
+			<br />
+			<p:inputText id="valor" value="#{despesaBean.lancamento.valor}" />
+			<br />
+
+			<p:outputLabel for="descricao" value="Descrição" />
+			<br />
+			<p:inputText id="descricao" value="#{despesaBean.lancamento.descricao}" size="50" />
+			<br />
+			
+			<h:panelGroup id="groupMeioPagto">
+				<h:panelGrid columns="4">
+					<h:column>
+						<p:outputLabel for="meio" value="Meio de Pagamento" />
+						<br />
+						<p:selectOneMenu id="meio" value="#{despesaBean.lancamento.meioDePagamento}">
+							<f:selectItems value="#{despesaBean.meioPagamentoItems}"/>
+							<p:ajax event="change" process="@this" update="groupMeioPagto"/>
+						</p:selectOneMenu>
+						<br />
+					</h:column>
+					
+					<h:column>
+						<p:outputLabel for="cartao" value="Cartão de Crédito" 
+							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
+						<br />
+						<p:selectOneMenu id="cartao" value="#{despesaBean.lancamento.cartaoDeCredito}" 
+							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}"
+							converter="entityConverter">
+							<f:selectItems value="#{despesaBean.cartaoCreditoItems}"/>
+						</p:selectOneMenu>
+						<br />
+					</h:column>
+					
+					<h:column>
+						<p:outputLabel for="qtdeParcelas" value="Qtde Parcelas" 
+							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
+						<br />
+						<p:inputText id="qtdeParcelas" value="#{despesaBean.lancamento.quantidadeParcelas}" 
+							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}" 
+							size="8"/>
+					</h:column>
+				</h:panelGrid>
+			</h:panelGroup>
+
+			<br />
+			<p:commandButton value="Salva" action="#{despesaBean.grava}" update="@form :messages table" ajax="false" />
+			<p:commandButton value="Cancela" action="lancamento.xhtml?faces-redirect=true" />
+			
+			<br />
+			<br />
+			
+			<p:dataTable id="table" value="#{despesaBean.lista}" var="lancamento" sortBy="">
+				<p:column>
+					<p:commandLink value="#{lancamento.id}" update="@form :messages">
+						<f:setPropertyActionListener target="#{despesaBean.lancamento}" value="#{lancamento}" />
+					</p:commandLink>
+				</p:column>
+				<p:column>
+					<h:outputText value="#{lancamento.data}">
+						<f:convertDateTime pattern="dd/MM/yyyy"/>
+					</h:outputText>
+				</p:column>
+				<p:column>
+					<h:outputText value="#{lancamento.descricao}" />
+				</p:column>
+				<p:column>
+					<h:outputText value="#{lancamento.quantidadeParcelas}" />
+				</p:column>
+				<p:column style="text-align: right">
+					<h:outputText value="#{lancamento.valorParcela}">
+						<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+					</h:outputText>
+				</p:column>
+				<p:column style="text-align: right">
+					<h:outputText value="#{lancamento.valor}">
+						<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+					</h:outputText>
+				</p:column>
+				<p:column>
+					<p:commandLink value="X" action="#{despesaBean.exclui}" update="@form :messages">
+						<f:setPropertyActionListener target="#{despesaBean.lancamento}" value="#{lancamento}" />
+					</p:commandLink>
+				</p:column>
+				<p:summaryRow>
+		            <p:column colspan="3" style="text-align:right">  
+		                Total:  
+		            </p:column>
+		            <p:column style="text-align: right">
+			            <h:outputText value="#{despesaBean.totalParcelas}">
+							<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+						</h:outputText>  
+		            </p:column>
+		            <p:column style="text-align: right">
+			            <h:outputText value="#{despesaBean.total}">
+							<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+						</h:outputText>  
+		            </p:column>
+		            <p:column colspan="2" style="text-align:right">  
+		            </p:column>
+		        </p:summaryRow>  
+			</p:dataTable>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
+</html>

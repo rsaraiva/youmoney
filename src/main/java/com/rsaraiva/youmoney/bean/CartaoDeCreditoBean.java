@@ -25,6 +25,7 @@ public class CartaoDeCreditoBean implements Serializable {
 		session.save(cartao);
 		session.getTransaction().commit();
 		session.close();
+		cartao = new CartaoDeCredito();
 		atualizaLista();
 	}
 
