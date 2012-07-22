@@ -7,103 +7,134 @@
 
 	<ui:define name="body">
 
-		<h1>Lançamentos</h1>
+		<h1>Despesas</h1>
 		
 		<p:messages id="messages" />
 
 		<h:form>
+		
+			<h:panelGrid columns="2">
+				<h:column>
 
-			<p:outputLabel for="data" value="Data" />
-			<br />
-			<p:calendar id="data" value="#{despesaBean.lancamento.data}" pattern="dd/MM/yyyy" />
-			<br />
-
-			<p:outputLabel for="valor" value="Valor" />
-			<br />
-			<p:inputText id="valor" value="#{despesaBean.lancamento.valor}" />
-			<br />
-
-			<p:outputLabel for="descricao" value="Descrição" />
-			<br />
-			<p:inputText id="descricao" value="#{despesaBean.lancamento.descricao}" size="50" />
-			<br />
-			
-			<h:panelGroup id="groupMeioPagto">
-				<h:panelGrid columns="4">
-					<h:column>
-						<p:outputLabel for="meio" value="Meio de Pagamento" />
-						<br />
-						<p:selectOneMenu id="meio" value="#{despesaBean.lancamento.meioDePagamento}">
-							<f:selectItems value="#{despesaBean.meioPagamentoItems}"/>
-							<p:ajax event="change" process="@this" update="groupMeioPagto"/>
-						</p:selectOneMenu>
-						<br />
-					</h:column>
+					<p:outputLabel for="data" value="Data" />
+					<br />
+					<p:calendar id="data" value="#{despesaBean.despesa.data}" pattern="dd/MM/yyyy" />
+					<br />
+		
+					<p:outputLabel for="valor" value="Valor" />
+					<br />
+					<p:inputText id="valor" value="#{despesaBean.despesa.valor}" />
+					<br />
+		
+					<p:outputLabel for="descricao" value="Descrição" />
+					<br />
+					<p:inputText id="descricao" value="#{despesaBean.despesa.descricao}" size="50" />
+					<br />
 					
-					<h:column>
-						<p:outputLabel for="cartao" value="Cartão de Crédito" 
-							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
-						<br />
-						<p:selectOneMenu id="cartao" value="#{despesaBean.lancamento.cartaoDeCredito}" 
-							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}"
-							converter="entityConverter">
-							<f:selectItems value="#{despesaBean.cartaoCreditoItems}"/>
-						</p:selectOneMenu>
-						<br />
-					</h:column>
+					<h:panelGroup id="groupMeioPagto">
+						<h:panelGrid columns="4">
+							<h:column>
+								<p:outputLabel for="meio" value="Meio de Pagamento" />
+								<br />
+								<p:selectOneMenu id="meio" value="#{despesaBean.despesa.meioDePagamento}">
+									<f:selectItems value="#{despesaBean.meioPagamentoItems}"/>
+									<p:ajax event="change" process="@this" update="groupMeioPagto"/>
+								</p:selectOneMenu>
+								<br />
+							</h:column>
+							
+							<h:column>
+								<p:outputLabel for="cartao" value="Cartão de Crédito" 
+									rendered="#{despesaBean.despesa.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
+								<br />
+								<p:selectOneMenu id="cartao" value="#{despesaBean.despesa.cartaoDeCredito}" 
+									rendered="#{despesaBean.despesa.meioDePagamento.descricao == 'Cartão de Crédito'}"
+									converter="entityConverter">
+									<f:selectItems value="#{despesaBean.cartaoCreditoItems}"/>
+								</p:selectOneMenu>
+									<br />
+							</h:column>
+							
+							<h:column>
+								<p:outputLabel for="qtdeParcelas" value="Qtde Parcelas" 
+									rendered="#{despesaBean.despesa.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
+								<br />
+								<p:inputText id="qtdeParcelas" value="#{despesaBean.despesa.quantidadeParcelas}" 
+									rendered="#{despesaBean.despesa.meioDePagamento.descricao == 'Cartão de Crédito'}" 
+									size="8"/>
+							</h:column>
+						</h:panelGrid>
+					</h:panelGroup>
+		
+					<br />
+					<p:commandButton value="Salva" action="#{despesaBean.grava}" update="@form :messages table" ajax="false" />
+					<p:commandButton value="Cancela" action="despesa.xhtml?faces-redirect=true" />
 					
-					<h:column>
-						<p:outputLabel for="qtdeParcelas" value="Qtde Parcelas" 
-							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}"/>
-						<br />
-						<p:inputText id="qtdeParcelas" value="#{despesaBean.lancamento.quantidadeParcelas}" 
-							rendered="#{despesaBean.lancamento.meioDePagamento.descricao == 'Cartão de Crédito'}" 
-							size="8"/>
-					</h:column>
-				</h:panelGrid>
-			</h:panelGroup>
-
-			<br />
-			<p:commandButton value="Salva" action="#{despesaBean.grava}" update="@form :messages table" ajax="false" />
-			<p:commandButton value="Cancela" action="lancamento.xhtml?faces-redirect=true" />
+					<br />
+					<br />
+				
+				</h:column>
+				
+				<h:column>
+					<p:dataTable value="#{despesaBean.despesa.lancamentos}" var="lancamento" style="margin-left: 50px; margin-bottom: 30px;">
+						<f:facet name="header">Lançamentos</f:facet>
+						<p:column>
+							<h:outputText value="#{lancamento.data}">
+								<f:convertDateTime pattern="dd/MM/yyyy"/>
+							</h:outputText>
+						</p:column>
+						<p:column>
+							<h:outputText value="#{lancamento.valor}">
+								<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
+							</h:outputText>
+						</p:column>
+					</p:dataTable>
+				</h:column>
 			
-			<br />
-			<br />
+			</h:panelGrid>
 			
-			<p:dataTable id="table" value="#{despesaBean.lista}" var="lancamento" sortBy="">
+			<p:calendar id="filtroDataInicial" value="#{despesaBean.filtroDataInicial}"/>
+			<p:calendar id="filtroDataFinal" value="#{despesaBean.filtroDataFinal}"/>
+			<p:commandButton action="#{despesaBean.filtrar()}" process="@this filtroDataInicial filtroDataFinal" update="@form"/>
+			
+			<p:dataTable id="table" value="#{despesaBean.lista}" var="despesa" sortBy="">
 				<p:column>
-					<p:commandLink value="#{lancamento.id}" update="@form :messages">
-						<f:setPropertyActionListener target="#{despesaBean.lancamento}" value="#{lancamento}" />
+					<p:commandLink value="#{despesa.id}" update="@form :messages">
+						<f:setPropertyActionListener target="#{despesaBean.despesa}" value="#{despesa}" />
 					</p:commandLink>
 				</p:column>
 				<p:column>
-					<h:outputText value="#{lancamento.data}">
+					<h:outputText value="#{despesa.data}">
 						<f:convertDateTime pattern="dd/MM/yyyy"/>
 					</h:outputText>
 				</p:column>
 				<p:column>
-					<h:outputText value="#{lancamento.descricao}" />
+					<h:outputText value="#{despesa.descricao}" />
 				</p:column>
 				<p:column>
-					<h:outputText value="#{lancamento.quantidadeParcelas}" />
+					<h:outputText value="#{despesa.meioDePagamentoString}" />
+				</p:column>
+				<p:column>
+					<h:outputText value="#{despesa.quantidadeParcelas}" />
 				</p:column>
 				<p:column style="text-align: right">
-					<h:outputText value="#{lancamento.valorParcela}">
+					<h:outputText value="#{despesa.valorParcela}">
 						<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
 					</h:outputText>
 				</p:column>
 				<p:column style="text-align: right">
-					<h:outputText value="#{lancamento.valor}">
+					<h:outputText value="#{despesa.valor}">
 						<f:convertNumber type="currency" minFractionDigits="2" currencySymbol="R$ "/>
 					</h:outputText>
 				</p:column>
 				<p:column>
 					<p:commandLink value="X" action="#{despesaBean.exclui}" update="@form :messages">
-						<f:setPropertyActionListener target="#{despesaBean.lancamento}" value="#{lancamento}" />
+						<f:setPropertyActionListener target="#{despesaBean.despesa}" value="#{despesa}" />
 					</p:commandLink>
 				</p:column>
+				
 				<p:summaryRow>
-		            <p:column colspan="3" style="text-align:right">  
+		            <p:column colspan="5" style="text-align:right">  
 		                Total:  
 		            </p:column>
 		            <p:column style="text-align: right">
@@ -118,7 +149,7 @@
 		            </p:column>
 		            <p:column colspan="2" style="text-align:right">  
 		            </p:column>
-		        </p:summaryRow>  
+		        </p:summaryRow>
 			</p:dataTable>
 		</h:form>
 

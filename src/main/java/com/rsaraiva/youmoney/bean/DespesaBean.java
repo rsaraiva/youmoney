@@ -2,9 +2,17 @@ package com.rsaraiva.youmoney.bean;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.Locale;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.model.SelectItem;
@@ -13,7 +21,9 @@ import org.hibernate.Session;
 
 import com.rsaraiva.youmoney.model.CartaoDeCredito;
 import com.rsaraiva.youmoney.model.Despesa;
+import com.rsaraiva.youmoney.model.Lancamento;
 import com.rsaraiva.youmoney.model.MeioDePagamento;
+import com.rsaraiva.youmoney.model.TipoLancamento;
 import com.rsaraiva.youmoney.util.HibernateUtil;
 
 @ManagedBean
@@ -30,18 +40,77 @@ public class DespesaBean implements Serializable {
 	
 	private BigDecimal total;
 	private BigDecimal totalParcelas;
+	private Date filtroDataInicial;
+	private Date filtroDataFinal;
+	
+	private Locale defaultLocale = Locale.getDefault();
+	
+	@PostConstruct
+	public void init() {
+		atualizaLista();
+	}
+	
+	public void filtrar() {
+		atualizaLista();
+	}		
 
 	public void grava() {
-		despesa.setValorParcela(despesa.getValor().divide(new BigDecimal(despesa.getQuantidadeParcelas())));
+		
 		Session session = new HibernateUtil().getSession();
 		session.beginTransaction();
+		
+		// calcula valor da parcela
+		despesa.setValorParcela(despesa.getValor().divide(new BigDecimal(despesa.getQuantidadeParcelas())));
+		
+		// limpa lancamentos
+		if (despesa.getLancamentos() != null) {
+			for (Lancamento l : despesa.getLancamentos()) {
+				session.delete(l);
+			}
+		}
+		
+		// calcular lancamentos
+		if (despesa.getQuantidadeParcelas() > 0) {
+			
+			despesa.setLancamentos(new ArrayList<Lancamento>());
+			
+			Calendar dataCompra = GregorianCalendar.getInstance();
+			dataCompra.setTime(despesa.getData());
+			int mesCompra = dataCompra.get(Calendar.MONTH);
+			int diaCompra = dataCompra.get(Calendar.DAY_OF_MONTH);
+			
+			int mesParcela = mesCompra;
+			
+			Calendar dataParcela = GregorianCalendar.getInstance();
+			dataParcela.setTime(despesa.getData());
+			
+			if (diaCompra > 10) {  // se a compra foi realizada ate o dia 10, entra na fatura do proprio mes
+				dataParcela.add(Calendar.MONTH, 1);
+			}
+			if (despesa.getCartaoDeCredito() != null) {
+				dataParcela.set(Calendar.DAY_OF_MONTH, despesa.getCartaoDeCredito().getDiaVencimento());
+			}
+			
+			for (int i = 1; i <= despesa.getQuantidadeParcelas(); i++) {
+				Lancamento lancamento = new Lancamento(despesa);
+				lancamento.setTipoLancamento(TipoLancamento.SAIDA);
+				lancamento.setValor(despesa.getValorParcela());
+				lancamento.setData(dataParcela.getTime());
+				despesa.getLancamentos().add(lancamento);
+				
+				System.out.println(new SimpleDateFormat("dd/MM/yyyy").format(dataParcela.getTime()));
+				dataParcela.add(Calendar.MONTH, 1);
+			}
+		}
+		
 		session.saveOrUpdate(despesa);
 		session.getTransaction().commit();
 		session.close();
-		//lancamento = new Lancamento();
+
 		despesa.setId(null);
 		despesa.setDescricao("");
 		despesa.setValor(null);
+		despesa.getLancamentos().clear();
 		atualizaLista();
 	}
 	
@@ -56,10 +125,30 @@ public class DespesaBean implements Serializable {
 	}
 	
 	private void atualizaLista() {
+		
 		lista = new ArrayList<Despesa>();
 		Session session = new HibernateUtil().getSession();
 		lista = session.getNamedQuery("findAllLancamentos").list();
+		session.close();
 		
+		if (filtroDataInicial != null && filtroDataFinal != null) {
+			Iterator<Despesa> iterator = lista.iterator();
+			search: 
+			while(iterator.hasNext()) {
+				Despesa d = iterator.next();
+				for (Lancamento l : d.getLancamentos()) {
+					if (l.getData().after(filtroDataInicial) && l.getData().before(filtroDataFinal)) {
+						continue search;
+					}
+				}
+				iterator.remove();
+			}
+		}
+		
+		atualizarTotais();
+	}
+	
+	private void atualizarTotais() {
 		// atualizar totais
 		total = BigDecimal.ZERO;
 		totalParcelas = BigDecimal.ZERO;
@@ -68,14 +157,9 @@ public class DespesaBean implements Serializable {
 			if (l.getValorParcela() != null)
 				totalParcelas = totalParcelas.add(l.getValorParcela());
 		}
-		
-		session.close();
 	}
 
 	public Collection<Despesa> getLista() {
-		if (lista == null) {
-			atualizaLista();
-		}
 		return lista;
 	}
 
@@ -112,12 +196,12 @@ public class DespesaBean implements Serializable {
 		this.cartaoDeCredito = cartaoDeCredito;
 	}
 
-	public Despesa getLancamento() {
+	public Despesa getDespesa() {
 		return despesa;
 	}
 
-	public void setLancamento(Despesa lancamento) {
-		this.despesa = lancamento;
+	public void setDespesa(Despesa despesa) {
+		this.despesa = despesa;
 	}
 
 	public BigDecimal getTotal() {
@@ -126,6 +210,26 @@ public class DespesaBean implements Serializable {
 
 	public BigDecimal getTotalParcelas() {
 		return totalParcelas;
+	}
+
+	public Locale getDefaultLocale() {
+		return defaultLocale;
+	}
+
+	public Date getFiltroDataInicial() {
+		return filtroDataInicial;
+	}
+
+	public void setFiltroDataInicial(Date filtroDataInicial) {
+		this.filtroDataInicial = filtroDataInicial;
+	}
+
+	public Date getFiltroDataFinal() {
+		return filtroDataFinal;
+	}
+
+	public void setFiltroDataFinal(Date filtroDataFinal) {
+		this.filtroDataFinal = filtroDataFinal;
 	}
 
 	private static final long serialVersionUID = -5614863366308078364L;

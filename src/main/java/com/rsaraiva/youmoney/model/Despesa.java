@@ -3,15 +3,19 @@ package com.rsaraiva.youmoney.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -38,6 +42,9 @@ public class Despesa implements Serializable {
 	
 	@ManyToOne
 	private CartaoDeCredito cartaoDeCredito;
+	
+	@OneToMany(mappedBy = "despesa", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	private List<Lancamento> lancamentos;
 
 	public Despesa() {
 		quantidadeParcelas = 1;
@@ -78,6 +85,13 @@ public class Despesa implements Serializable {
 	public MeioDePagamento getMeioDePagamento() {
 		return meioDePagamento;
 	}
+	
+	public String getMeioDePagamentoString() {
+		if (meioDePagamento.equals(MeioDePagamento.CA)) {
+			return cartaoDeCredito.getDescricao();
+		}
+		return meioDePagamento.getDescricao();
+	}
 
 	public void setMeioDePagamento(MeioDePagamento meioDePagamento) {
 		this.meioDePagamento = meioDePagamento;
@@ -105,6 +119,14 @@ public class Despesa implements Serializable {
 
 	public void setCartaoDeCredito(CartaoDeCredito cartaoDeCredito) {
 		this.cartaoDeCredito = cartaoDeCredito;
+	}
+
+	public List<Lancamento> getLancamentos() {
+		return lancamentos;
+	}
+
+	public void setLancamentos(List<Lancamento> lancamentos) {
+		this.lancamentos = lancamentos;
 	}
 
 	@Override
